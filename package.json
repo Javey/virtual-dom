@@ -1,5 +1,5 @@
 {
-  "name": "virtual-dom",
+  "name": "virtual-domx",
   "version": "2.1.1",
   "description": "A batched diff-based DOM rendering strategy",
   "keywords": [
@@ -12,9 +12,9 @@
     "browser"
   ],
   "author": "Matt-Esch <matt@mattesch.info>",
-  "repository": "git://github.com/Matt-Esch/virtual-dom.git",
+  "repository": "git://github.com/Javey/virtual-dom.git",
   "main": "index",
-  "homepage": "https://github.com/Matt-Esch/virtual-dom",
+  "homepage": "https://github.com/Javey/virtual-dom",
   "contributors": [
     {
       "name": "Matt-Esch"
