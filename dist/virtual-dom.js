@@ -849,7 +849,7 @@ function h(tagName, properties, children) {
 }
 
 function addChild(c, childNodes, tag, props) {
-    if (typeof c === 'string') {
+    if (typeof c === 'string' || typeof c === 'number') {
         childNodes.push(new VText(c));
     } else if (typeof c === 'number') {
         childNodes.push(new VText(String(c)));
@@ -1257,7 +1257,7 @@ function diff(a, b) {
 }
 
 function walk(a, b, patch, index) {
-    if (a === b) {
+    if (a === b && !isWidget(a)) {
         return
     }
 
