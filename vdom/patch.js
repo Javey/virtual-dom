@@ -1,4 +1,4 @@
-var document = require("global/document")
+var document = require("globalx/document")
 var isArray = require("x-is-array")
 
 var render = require("./create-element")

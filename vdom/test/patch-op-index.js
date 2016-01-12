@@ -2,7 +2,7 @@ var test = require("tape")
 var VNode = require("../../vnode/vnode")
 var VText = require("../../vnode/vtext")
 var diff = require("../../vtree/diff")
-var document = require("global/document")
+var document = require("globalx/document")
 
 var createElement = require("../create-element")
 var patch = require("../patch")
