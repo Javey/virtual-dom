@@ -1,4 +1,4 @@
-var document = require("global/document")
+var document = require("globalx/document")
 
 var applyProperties = require("./apply-properties")
 
@@ -26,10 +26,15 @@ function createElement(vnode, opts) {
         return null
     }
 
-    var node = (vnode.namespace === null) ?
-        doc.createElement(vnode.tagName) :
-        doc.createElementNS(vnode.namespace, vnode.tagName)
-
+    var node
+    if (vnode.tagName === 'FRAGMENT') {
+        node = doc.createDocumentFragment()
+    } else {
+        node = (vnode.namespace === null) ?
+            doc.createElement(vnode.tagName) :
+            doc.createElementNS(vnode.namespace, vnode.tagName)
+    }
+    
     var props = vnode.properties
     applyProperties(node, props)
 
