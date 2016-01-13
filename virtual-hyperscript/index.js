@@ -67,7 +67,7 @@ h.c = function(comment) {
 }
 
 function addChild(c, childNodes, tag, props) {
-    if (typeof c === 'string' || typeof c === 'number') {
+    if (typeof c === 'string') {
         childNodes.push(new VText(c));
     } else if (typeof c === 'number') {
         childNodes.push(new VText(String(c)));
