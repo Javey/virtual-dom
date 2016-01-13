@@ -8,7 +8,7 @@ var diff = require("./vtree/diff.js")
 
 module.exports = diff
 
-},{"./vtree/diff.js":35}],3:[function(require,module,exports){
+},{"./vtree/diff.js":37}],3:[function(require,module,exports){
 var h = require("./virtual-hyperscript/index.js")
 
 module.exports = h
@@ -30,7 +30,7 @@ module.exports = {
     VText: VText
 }
 
-},{"./create-element.js":1,"./diff.js":2,"./h.js":3,"./patch.js":13,"./vnode/vnode.js":31,"./vnode/vtext.js":33}],5:[function(require,module,exports){
+},{"./create-element.js":1,"./diff.js":2,"./h.js":3,"./patch.js":13,"./vnode/vnode.js":33,"./vnode/vtext.js":35}],5:[function(require,module,exports){
 
 },{}],6:[function(require,module,exports){
 /*!
@@ -349,7 +349,7 @@ function getPrototype(value) {
     }
 }
 
-},{"../vnode/is-vhook.js":26,"is-object":11}],15:[function(require,module,exports){
+},{"../vnode/is-vhook.js":27,"is-object":11}],15:[function(require,module,exports){
 var document = require("globalx/document")
 
 var applyProperties = require("./apply-properties")
@@ -357,6 +357,7 @@ var applyProperties = require("./apply-properties")
 var isVNode = require("../vnode/is-vnode.js")
 var isVText = require("../vnode/is-vtext.js")
 var isWidget = require("../vnode/is-widget.js")
+var isVComment = require("../vnode/is-vcomment.js")
 var handleThunk = require("../vnode/handle-thunk.js")
 
 module.exports = createElement
@@ -371,6 +372,8 @@ function createElement(vnode, opts) {
         return vnode.init()
     } else if (isVText(vnode)) {
         return doc.createTextNode(vnode.text)
+    } else if (isVComment(vnode)) {
+        return doc.createComment(vnode.comment)
     } else if (!isVNode(vnode)) {
         if (warn) {
             warn("Item is not a valid virtual dom node", vnode)
@@ -402,7 +405,7 @@ function createElement(vnode, opts) {
     return node
 }
 
-},{"../vnode/handle-thunk.js":24,"../vnode/is-vnode.js":27,"../vnode/is-vtext.js":28,"../vnode/is-widget.js":29,"./apply-properties":14,"globalx/document":8}],16:[function(require,module,exports){
+},{"../vnode/handle-thunk.js":24,"../vnode/is-vcomment.js":26,"../vnode/is-vnode.js":28,"../vnode/is-vtext.js":29,"../vnode/is-widget.js":30,"./apply-properties":14,"globalx/document":8}],16:[function(require,module,exports){
 // Maps a virtual DOM tree onto a real DOM tree in an efficient manner.
 // We don't want to read all of the DOM nodes in the tree so we use
 // the in-order tree indexing to eliminate recursion down certain branches.
@@ -511,6 +514,8 @@ function applyPatch(vpatch, domNode, renderOptions) {
             return insertNode(domNode, patch, renderOptions)
         case VPatch.VTEXT:
             return stringPatch(domNode, vNode, patch, renderOptions)
+        case VPatch.VCOMMENT:
+            return commentPatch(domNode, vNode, patch, renderOptions)
         case VPatch.WIDGET:
             return widgetPatch(domNode, vNode, patch, renderOptions)
         case VPatch.VNODE:
@@ -560,6 +565,25 @@ function stringPatch(domNode, leftVNode, vText, renderOptions) {
     } else {
         var parentNode = domNode.parentNode
         newNode = renderOptions.render(vText, renderOptions)
+
+        if (parentNode && newNode !== domNode) {
+            parentNode.replaceChild(newNode, domNode)
+        }
+    }
+
+    return newNode
+}
+
+function commentPatch(domNode, leftNode, vComment, renderOptions) {
+    var newNode
+
+    if (domNode.nodeType === 8) {
+        // todo: need min-document to support replaceData method to update nodeValue and length
+        domNode.data = vComment.comment
+        newNode = domNode
+    } else {
+        var parentNode = domNode.parentNode
+        newNode = renderOptions.render(vComment, renderOptions)
 
         if (parentNode && newNode !== domNode) {
             parentNode.replaceChild(newNode, domNode)
@@ -643,7 +667,7 @@ function replaceRoot(oldRoot, newRoot) {
     return newRoot;
 }
 
-},{"../vnode/is-widget.js":29,"../vnode/vpatch.js":32,"./apply-properties":14,"./update-widget":19}],18:[function(require,module,exports){
+},{"../vnode/is-widget.js":30,"../vnode/vpatch.js":34,"./apply-properties":14,"./update-widget":19}],18:[function(require,module,exports){
 var document = require("globalx/document")
 var isArray = require("x-is-array")
 
@@ -742,7 +766,7 @@ function updateWidget(a, b) {
     return false
 }
 
-},{"../vnode/is-widget.js":29}],20:[function(require,module,exports){
+},{"../vnode/is-widget.js":30}],20:[function(require,module,exports){
 'use strict';
 
 var EvStore = require('ev-store');
@@ -797,8 +821,10 @@ var isArray = require('x-is-array');
 
 var VNode = require('../vnode/vnode.js');
 var VText = require('../vnode/vtext.js');
+var VComment = require('../vnode/vcomment.js');
 var isVNode = require('../vnode/is-vnode');
 var isVText = require('../vnode/is-vtext');
+var isVComment = require('../vnode/is-vcomment');
 var isWidget = require('../vnode/is-widget');
 var isHook = require('../vnode/is-vhook');
 var isVThunk = require('../vnode/is-thunk');
@@ -853,6 +879,10 @@ function h(tagName, properties, children) {
     return new VNode(tag, props, childNodes, key, namespace);
 }
 
+h.c = function(comment) {
+    return new VComment(comment) 
+}
+
 function addChild(c, childNodes, tag, props) {
     if (typeof c === 'string' || typeof c === 'number') {
         childNodes.push(new VText(c));
@@ -895,7 +925,7 @@ function transformProperties(props) {
 }
 
 function isChild(x) {
-    return isVNode(x) || isVText(x) || isWidget(x) || isVThunk(x);
+    return isVNode(x) || isVText(x) || isWidget(x) || isVThunk(x) || isVComment(x);
 }
 
 function isChildren(x) {
@@ -929,7 +959,7 @@ function errorString(obj) {
     }
 }
 
-},{"../vnode/is-thunk":25,"../vnode/is-vhook":26,"../vnode/is-vnode":27,"../vnode/is-vtext":28,"../vnode/is-widget":29,"../vnode/vnode.js":31,"../vnode/vtext.js":33,"./hooks/ev-hook.js":20,"./hooks/soft-set-hook.js":21,"./parse-tag.js":23,"x-is-array":12}],23:[function(require,module,exports){
+},{"../vnode/is-thunk":25,"../vnode/is-vcomment":26,"../vnode/is-vhook":27,"../vnode/is-vnode":28,"../vnode/is-vtext":29,"../vnode/is-widget":30,"../vnode/vcomment.js":31,"../vnode/vnode.js":33,"../vnode/vtext.js":35,"./hooks/ev-hook.js":20,"./hooks/soft-set-hook.js":21,"./parse-tag.js":23,"x-is-array":12}],23:[function(require,module,exports){
 'use strict';
 
 var split = require('browser-split');
@@ -1027,7 +1057,7 @@ function renderThunk(thunk, previous) {
     return renderedThunk
 }
 
-},{"./is-thunk":25,"./is-vnode":27,"./is-vtext":28,"./is-widget":29}],25:[function(require,module,exports){
+},{"./is-thunk":25,"./is-vnode":28,"./is-vtext":29,"./is-widget":30}],25:[function(require,module,exports){
 module.exports = isThunk
 
 function isThunk(t) {
@@ -1035,6 +1065,15 @@ function isThunk(t) {
 }
 
 },{}],26:[function(require,module,exports){
+var version = require("./version")
+
+module.exports = isVirtualComment
+
+function isVirtualComment(x) {
+    return x && x.type === "VirtualComment" && x.version === version 
+}
+
+},{"./version":32}],27:[function(require,module,exports){
 module.exports = isHook
 
 function isHook(hook) {
@@ -1043,7 +1082,7 @@ function isHook(hook) {
        typeof hook.unhook === "function" && !hook.hasOwnProperty("unhook"))
 }
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualNode
@@ -1052,7 +1091,7 @@ function isVirtualNode(x) {
     return x && x.type === "VirtualNode" && x.version === version
 }
 
-},{"./version":30}],28:[function(require,module,exports){
+},{"./version":32}],29:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualText
@@ -1061,17 +1100,29 @@ function isVirtualText(x) {
     return x && x.type === "VirtualText" && x.version === version
 }
 
-},{"./version":30}],29:[function(require,module,exports){
+},{"./version":32}],30:[function(require,module,exports){
 module.exports = isWidget
 
 function isWidget(w) {
     return w && w.type === "Widget"
 }
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
+var version = require("./version")
+
+module.exports = VirtualComment
+
+function VirtualComment(comment) {
+    this.comment = String(comment)
+}
+
+VirtualComment.prototype.version = version
+VirtualComment.prototype.type = "VirtualComment"
+
+},{"./version":32}],32:[function(require,module,exports){
 module.exports = "2"
 
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var version = require("./version")
 var isVNode = require("./is-vnode")
 var isWidget = require("./is-widget")
@@ -1145,7 +1196,7 @@ function VirtualNode(tagName, properties, children, key, namespace) {
 VirtualNode.prototype.version = version
 VirtualNode.prototype.type = "VirtualNode"
 
-},{"./is-thunk":25,"./is-vhook":26,"./is-vnode":27,"./is-widget":29,"./version":30}],32:[function(require,module,exports){
+},{"./is-thunk":25,"./is-vhook":27,"./is-vnode":28,"./is-widget":30,"./version":32}],34:[function(require,module,exports){
 var version = require("./version")
 
 VirtualPatch.NONE = 0
@@ -1157,6 +1208,7 @@ VirtualPatch.ORDER = 5
 VirtualPatch.INSERT = 6
 VirtualPatch.REMOVE = 7
 VirtualPatch.THUNK = 8
+VirtualPatch.VCOMMENT = 9
 
 module.exports = VirtualPatch
 
@@ -1169,7 +1221,7 @@ function VirtualPatch(type, vNode, patch) {
 VirtualPatch.prototype.version = version
 VirtualPatch.prototype.type = "VirtualPatch"
 
-},{"./version":30}],33:[function(require,module,exports){
+},{"./version":32}],35:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = VirtualText
@@ -1181,7 +1233,7 @@ function VirtualText(text) {
 VirtualText.prototype.version = version
 VirtualText.prototype.type = "VirtualText"
 
-},{"./version":30}],34:[function(require,module,exports){
+},{"./version":32}],36:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook")
 
@@ -1241,12 +1293,13 @@ function getPrototype(value) {
   }
 }
 
-},{"../vnode/is-vhook":26,"is-object":11}],35:[function(require,module,exports){
+},{"../vnode/is-vhook":27,"is-object":11}],37:[function(require,module,exports){
 var isArray = require("x-is-array")
 
 var VPatch = require("../vnode/vpatch")
 var isVNode = require("../vnode/is-vnode")
 var isVText = require("../vnode/is-vtext")
+var isVComment = require("../vnode/is-vcomment")
 var isWidget = require("../vnode/is-widget")
 var isThunk = require("../vnode/is-thunk")
 var handleThunk = require("../vnode/handle-thunk")
@@ -1307,6 +1360,13 @@ function walk(a, b, patch, index) {
             applyClear = true
         } else if (a.text !== b.text) {
             apply = appendPatch(apply, new VPatch(VPatch.VTEXT, a, b))
+        }
+    } else if (isVComment(b)) {
+        if (!isVComment(a)) {
+            apply = appendPatch(apply, new VPatch(VPatch.VCOMMENT, a, b))
+            applyClear = true
+        } else if (a.comment !== b.comment) {
+            apply = appendPatch(apply, new VPatch(VPatch.VCOMMENT, a, b))
         }
     } else if (isWidget(b)) {
         if (!isWidget(a)) {
@@ -1669,5 +1729,5 @@ function appendPatch(apply, patch) {
     }
 }
 
-},{"../vnode/handle-thunk":24,"../vnode/is-thunk":25,"../vnode/is-vnode":27,"../vnode/is-vtext":28,"../vnode/is-widget":29,"../vnode/vpatch":32,"./diff-props":34,"x-is-array":12}]},{},[4])(4)
+},{"../vnode/handle-thunk":24,"../vnode/is-thunk":25,"../vnode/is-vcomment":26,"../vnode/is-vnode":28,"../vnode/is-vtext":29,"../vnode/is-widget":30,"../vnode/vpatch":34,"./diff-props":36,"x-is-array":12}]},{},[4])(4)
 });
