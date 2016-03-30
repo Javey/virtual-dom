@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "browser-split": "0.0.1",
+    "dom-delegator": "^13.1.0",
     "error": "^4.3.0",
     "ev-store": "^7.0.0",
     "globalx": "^4.3.0",

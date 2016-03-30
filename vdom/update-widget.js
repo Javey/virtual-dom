@@ -7,7 +7,7 @@ function updateWidget(a, b) {
         if ("name" in a && "name" in b) {
             return a.id === b.id
         } else {
-            return a.init === b.init
+            return a.constructor === b.constructor
         }
     }
 
