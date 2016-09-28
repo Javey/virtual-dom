@@ -1,6 +1,6 @@
 {
   "name": "virtual-domx",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "A batched diff-based DOM rendering strategy",
   "keywords": [
     "virtual",
