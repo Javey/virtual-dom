@@ -29,7 +29,7 @@
     "dom-delegator": "^13.1.0",
     "error": "^4.3.0",
     "ev-store": "^7.0.0",
-    "globalx": "^4.3.0",
+    "globalx": "^4.3.2",
     "is-object": "^1.0.1",
     "next-tick": "^0.2.2",
     "x-is-array": "0.1.0",
