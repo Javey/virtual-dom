@@ -1,4 +1,4 @@
-var document = require("globalx/document")
+var document = require("global/document")
 
 var applyProperties = require("./apply-properties")
 

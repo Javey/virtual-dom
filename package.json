@@ -29,7 +29,7 @@
     "dom-delegator": "^13.1.0",
     "error": "^4.3.0",
     "ev-store": "^7.0.0",
-    "globalx": "^4.3.2",
+    "global": "git://github.com/Javey/global.git#master",
     "is-object": "^1.0.1",
     "next-tick": "^0.2.2",
     "x-is-array": "0.1.0",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "browserify": "^9.0.7",
     "istanbul": "^0.3.13",
-    "min-documentx": "^2.14.0",
+    "min-document": "git://github.com/Javey/min-document.git#master",
     "opn": "^1.0.1",
     "run-browser": "^2.0.2",
     "tap-dot": "^1.0.0",
