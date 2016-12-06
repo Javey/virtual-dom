@@ -20,7 +20,12 @@ function applyProperties(node, props, previous) {
             if (isObject(propValue)) {
                 patchObject(node, props, previous, propName, propValue);
             } else {
-                node[propName] = propValue
+                // support inline style like `style="display: block;"`
+                if (propName === 'style') {
+                    node.style.cssText = propValue;
+                } else {
+                    node[propName] = propValue
+                }
             }
         }
     }
@@ -36,8 +41,12 @@ function removeProperty(node, propName, propValue, previous) {
                     node.removeAttribute(attrName)
                 }
             } else if (propName === "style") {
-                for (var i in previousValue) {
-                    node.style[i] = ""
+                if (isObject(previousValue)) {
+                    for (var i in previousValue) {
+                        node.style[i] = ""
+                    }
+                } else {
+                    node.style.cssText = ""
                 }
             } else if (typeof previousValue === "string") {
                 node[propName] = ""
