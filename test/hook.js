@@ -1,6 +1,6 @@
 var test = require("tape")
 
-var h = require("../h.js")
+var h = require("./h.js")
 var Node = require("../vnode/vnode.js")
 var create = require("../create-element.js")
 var diff = require("../diff.js")

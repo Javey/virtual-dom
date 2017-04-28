@@ -1,7 +1,7 @@
 var test = require("tape")
 var EvStore = require('ev-store')
 
-var h = require("../index")
+var h = require("../../test/h.js")
 
 test("h is a function", function (assert) {
     assert.equal(typeof h, "function")

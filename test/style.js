@@ -1,7 +1,7 @@
 var test = require("tape")
 var document = require("global/document")
 
-var h = require("../h")
+var h = require("./h")
 var diff = require("../diff")
 var patch = require("../patch")
 var render = require("../create-element")

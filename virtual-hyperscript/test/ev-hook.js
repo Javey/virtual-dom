@@ -1,7 +1,7 @@
 var test = require("tape")
 var EvStore = require("ev-store")
 
-var h = require("../index.js")
+var h = require("../../test/h.js")
 var createElement = require("../../vdom/create-element")
 var patch = require("../../vdom/patch")
 var diff = require("../../vtree/diff")

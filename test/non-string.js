@@ -1,5 +1,5 @@
 var test = require("tape")
-var h = require("../h.js")
+var h = require("./h.js")
 var diff = require("../diff.js")
 var patch = require("../patch.js")
 var createElement = require("../create-element.js")

@@ -12,15 +12,16 @@ var isWidget = require('../vnode/is-widget');
 var isHook = require('../vnode/is-vhook');
 var isVThunk = require('../vnode/is-thunk');
 
-var parseTag = require('./parse-tag.js');
 var softSetHook = require('./hooks/soft-set-hook.js');
 var evHook = require('./hooks/ev-hook.js');
 
 module.exports = h;
 
-function h(tagName, properties, children) {
+function h(tag, properties, children) {
     var childNodes = [];
-    var tag, props, key, namespace;
+    var props, key, namespace;
+
+    tag || (tag = "DIV")
 
     if (!children && isChildren(properties)) {
         children = properties;
@@ -28,7 +29,10 @@ function h(tagName, properties, children) {
     }
 
     props = props || properties || {};
-    tag = parseTag(tagName, props);
+
+    if (!props.namespace) {
+        tag = tag.toUpperCase();
+    }
 
     // support keys
     if (props.hasOwnProperty('key')) {

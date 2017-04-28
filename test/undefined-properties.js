@@ -1,7 +1,7 @@
 var test = require("tape")
 var isObject = require("is-object")
 
-var h = require("../h.js")
+var h = require("./h.js")
 var diff = require("../diff.js")
 var patch = require("../patch.js")
 var render = require("../create-element.js")
