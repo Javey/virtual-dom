@@ -24,7 +24,11 @@ function applyProperties(node, props, previous) {
                 if (propName === 'style') {
                     node.style.cssText = propValue;
                 } else {
-                    node[propName] = propValue
+                    try {
+                        node[propName] = propValue
+                    } catch (e) {
+                        node.setAttribute(propName, propValue);
+                    }
                 }
             }
         }
